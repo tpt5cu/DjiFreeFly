@@ -1,0 +1,5 @@
+pip~=21.0.1
+opencv-python~=4.5.1.48
+pygame~=2.0.1
+djitellopy
+numpy~=1.20.2
