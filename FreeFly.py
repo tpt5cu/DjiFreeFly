@@ -15,7 +15,6 @@ me.streamon()
 
 def getKeyboardInput():
     lr, fb, ud, yv = 0, 0, 0, 0
-
     speed = 50
     if kp.getKey("LEFT"):
         lr = -speed
