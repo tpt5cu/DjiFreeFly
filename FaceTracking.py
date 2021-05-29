@@ -2,6 +2,7 @@
 from ImageCapture import ImageStream
 import cv2
 import numpy as np
+import time
 
 
 
@@ -64,6 +65,9 @@ class FaceTrack(ImageStream):
 
 		# cap = cv2.VideoCapture(0)
 		self.stream()
+		self.me.takeoff()
+		self.me.send_rc_control(0,0,15,0)
+		time.sleep(2.2)
 		while True:
 			# _, img = cap.read()
 			img = self.me.get_frame_read().frame
