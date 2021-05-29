@@ -14,7 +14,7 @@ class FaceTrack(ImageStream):
 		self.pError = 0
 
 	def findFace(self, img):
-		faceCascade = cv2.CascadeClassifier("/ml_resources/haarcascade_frontalface_default.xml")
+		faceCascade = cv2.CascadeClassifier("ml_resources/haarcascade_frontalface_default.xml")
 		imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 		faces = faceCascade.detectMultiScale(imgGray, 1.2, int(8))
 
@@ -72,7 +72,9 @@ class FaceTrack(ImageStream):
 			self.pError = self.trackFace(info)
 			print("Center ", info[0], "area ", info[1])
 			cv2.imshow("Output", img)
-			cv2.waitKey(1)
+			if cv2.waitKey(1) & 0xFF == ord('q'):
+				self.me.land()
+				break
 
 
 
