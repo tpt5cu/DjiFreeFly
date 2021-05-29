@@ -3,15 +3,17 @@ from ImageCapture import ImageStream
 import cv2
 import numpy as np
 
-forward_backward_range = [6200, 6800]
-pid = [0.4, 0.4, 0]
-w, h = 360, 240
-pError = 0
+
 
 class FaceTrack(ImageStream):
 	def __init__(self):
 		super().__init__()
-	def findFace(img):
+		self.forward_backward_range = [6200, 6800]
+		self.pid = [0.4, 0.4, 0]
+		self.w, self.h = 360, 240
+		self.pError = 0
+
+	def findFace(self, img):
 		faceCascade = cv2.CascadeClassifier("/ml_resources/haarcascade_frontalface_default.xml")
 		imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 		faces = faceCascade.detectMultiScale(imgGray, 1.2, int(8))
@@ -35,36 +37,38 @@ class FaceTrack(ImageStream):
 			return img, [[0, 0], 0]
 
 
-	def trackFace(me, info, w, pid, pError):
+	def trackFace(self, info):
 
 		area = info[1]
 		x, y = info[0]
 
 		#Find how far off from the center we are
-		error = x - w//2
-		yaw_speed = pid[0] * error + pid[1] * (error - pError)
+		error = x - self.w//2
+		yaw_speed = self.pid[0] * error + self.pid[1] * (error - self.pError)
 		yaw_speed = int(np.clip(yaw_speed, -100, 100))
 
 		forward_backward = 0
-		if area > forward_backward_range[1]:
+		if area > self.forward_backward_range[1]:
 			forward_backward = -20
-		elif area < forward_backward_range[0] and area != 0:
+		elif area < self.forward_backward_range[0] and area != 0:
 			forward_backward = 20
 
 		if x == 0:
 			yaw_speed = 0
 			error = 0
 
-		me.send_rc_control(0, forward_backward, 0, yaw_speed)
+		self.me.send_rc_control(0, forward_backward, 0, yaw_speed)
 		return error
 
-	cap = cv2.VideoCapture(0)
-	while True:
-		_, img = cap.read()
-		img = cv2.resize(img, (w,h))
-		img, info = findFace(img)
-		pError = trackFace(me, info, w, pid, pError)
-		print("Center ", info[0], "area ", info[1])
-		cv2.imshow("Output", img)
-		cv2.waitKey(1)
+	def track(self):
+
+		cap = cv2.VideoCapture(0)
+		while True:
+			_, img = cap.read()
+			img = cv2.resize(img, (self.w, self.h))
+			img, info = self.findFace(img)
+			self.pError = self.trackFace(info)
+			print("Center ", info[0], "area ", info[1])
+			cv2.imshow("Output", img)
+			cv2.waitKey(1)
 
