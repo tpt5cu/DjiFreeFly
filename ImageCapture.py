@@ -10,8 +10,8 @@ class ImageStream(DroneStart):
 
     def stream(self):
         self.me.streamon()
-        img = self.me.get_frame_read().frame
-        return img
+        # self.img = self.me.get_frame_read().frame
+        print("STREAM IS ON")
 
     def test_stream(self):
         img = self.stream()

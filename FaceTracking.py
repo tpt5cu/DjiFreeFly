@@ -62,13 +62,17 @@ class FaceTrack(ImageStream):
 
 	def track(self):
 
-		cap = cv2.VideoCapture(0)
+		# cap = cv2.VideoCapture(0)
+		self.stream()
 		while True:
-			_, img = cap.read()
+			# _, img = cap.read()
+			img = self.me.get_frame_read().frame
 			img = cv2.resize(img, (self.w, self.h))
 			img, info = self.findFace(img)
 			self.pError = self.trackFace(info)
 			print("Center ", info[0], "area ", info[1])
 			cv2.imshow("Output", img)
 			cv2.waitKey(1)
+
+
 
