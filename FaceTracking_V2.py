@@ -15,7 +15,12 @@ class FaceTrack(ImageStream):
         self.pError = 0
         self.face_cascade = cv2.CascadeClassifier("ml_resources/haarcascade_frontalface_default.xml")
 
-    def findFace(self):
+    def find_face(self):
+        """
+        Finds faces in frame
+
+        :return: None
+        """
 
         #Get frame
         frame = self.me.get_frame_read().frame
@@ -41,6 +46,7 @@ class FaceTrack(ImageStream):
 
         face_center_x = center_x
         face_center_y = center_y
+        z_area = 0
         for face in faces:
             (x, y, w, h) = face
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 255, 0), 2)
@@ -60,7 +66,7 @@ class FaceTrack(ImageStream):
         cv2.putText(frame, f'[{offset_x}, {offset_y}, {z_area}]', (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255),
                    2, cv2.LINE_AA)
 
-        self.track(offset_x, offset_y, z_area)
+        self.adjust_tello_position(offset_x, offset_y, z_area)
 
         cv2.imshow('Tello TrackFace_V2', frame)
         # @deprecated
@@ -80,28 +86,31 @@ class FaceTrack(ImageStream):
         #     return img, [[0, 0], 0]
         #
 
-    def track(self, offset_x, offset_y, z_area):
+    def adjust_telo_position(self, offset_x, offset_y, offset_z):
+        """
+            Adjusts the position of the tello drone based on the offset values given from the frame
+            :param offset_x: Offset between center and face x coordinates
+            :param offset_y: Offset between center and face y coordinates
+            :param offset_z: Area of the face detection rectangle on the frame
+        """
 
-        area = info[1]
-        x, y = info[0]
+        if not -90 <= offset_x <= 90 and offset_x is not 0:
+            if offset_x < 0:
+                self.me.rotate_ccw(10)
+            elif offset_x > 0:
+                self.me.rotate_cw(10)
 
-        #Find how far off from the center we are
-        error = x - self.w//2
-        yaw_speed = self.pid[0] * error + self.pid[1] * (error - self.pError)
-        yaw_speed = int(np.clip(yaw_speed, -100, 100))
+        if not -70 <= offset_y <= 70 and offset_y is not -30:
+            if offset_y < 0:
+                self.me.move_up(20)
+            elif offset_y > 0:
+                self.me.move_down(20)
 
-        forward_backward = 0
-        if area > self.forward_backward_range[1]:
-            forward_backward = -20
-        elif area < self.forward_backward_range[0] and area != 0:
-            forward_backward = 20
-
-        if x == 0:
-            yaw_speed = 0
-            error = 0
-
-        self.me.send_rc_control(0, forward_backward, 0, yaw_speed)
-        return error
+        if not 15000 <= offset_z <= 30000 and offset_z is not 0:
+            if offset_z < 15000:
+                self.me.move_forward(20)
+            elif offset_z > 30000:
+                self.me.move_backward(20)
 
     def track(self):
 
@@ -111,7 +120,7 @@ class FaceTrack(ImageStream):
         self.me.send_rc_control(0, 0, 15, 0)
         time.sleep(2.2)
         while True:
-            self.findFace()
+            self.find_face()
             if cv2.waitKey(1) == ord('q'):
                 break
 
