@@ -8,15 +8,11 @@ def init():
 
 
 def getKey(keyName):
-    ans = False
-    for event in pygame.event.get():
-        pass
+    pygame.event.pump()
     keyInput = pygame.key.get_pressed()
-    myKey = getattr(pygame, 'K_{}'.format(keyName))
-    if keyInput[myKey]:
-        ans = True
+    myKey = pygame.key.key_code(keyName)
     pygame.display.update()
-    return ans
+    return keyInput[myKey]
 
 def main():
     if getKey("LEFT"):
