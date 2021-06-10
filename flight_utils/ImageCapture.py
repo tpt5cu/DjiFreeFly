@@ -1,4 +1,4 @@
-from DroneStart import DroneStart
+from flight_utils.DroneStart import DroneStart
 import cv2
 
 

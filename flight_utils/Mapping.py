@@ -1,6 +1,5 @@
 from djitellopy import tello
-import KeyPress as kp
-from time import sleep
+from flight_utils import KeyPress as kp
 import numpy as np
 import cv2
 

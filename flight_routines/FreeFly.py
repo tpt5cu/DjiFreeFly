@@ -1,4 +1,4 @@
-import KeyPress as kp
+from flight_utils import KeyPress as kp
 from djitellopy import tello
 from time import sleep, time
 import cv2

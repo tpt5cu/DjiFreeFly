@@ -1,5 +1,5 @@
 #FaceTracking
-from ImageCapture import ImageStream
+from flight_utils.ImageCapture import ImageStream
 import cv2
 import numpy as np
 import time

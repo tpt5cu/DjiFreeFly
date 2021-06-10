@@ -1,8 +1,7 @@
 #FaceTracking
 # Based off of https://github.com/juanmapf97/Tello-Face-Recognition/blob/master/face_recognition/main.py
-from ImageCapture import ImageStream
+from flight_utils.ImageCapture import ImageStream
 import cv2
-import numpy as np
 import time
 
 
