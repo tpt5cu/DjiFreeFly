@@ -14,6 +14,6 @@ if len(sys.argv) != 2:
 print(f'Script Name is {sys.argv[0]}')
 routine = sys.argv[1]
 if routine == 'FaceTracking':
-    FaceTracking.FaceTrack.track()
+    FaceTracking.FaceTrack().track()
 elif routine == 'FaceTracking_V2':
-    FaceTracking_V2.FaceTrack.track()
+    FaceTracking_V2.FaceTrack().track()
