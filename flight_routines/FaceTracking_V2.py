@@ -9,7 +9,6 @@ class FaceTrack(ImageStream):
     def __init__(self):
         super().__init__()
         self.forward_backward_range = [6200, 6800]
-        self.pid = [0.4, 0.4, 0]
         self.w, self.h = 360, 240
         self.pError = 0
         self.face_cascade = cv2.CascadeClassifier("ml_resources/haarcascade_frontalface_default.xml")
