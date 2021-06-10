@@ -20,7 +20,7 @@ class FaceTrack(ImageStream):
 
         :return: None
         """
-
+        print("attempting to find face....")
         #Get frame
         frame = self.me.get_frame_read().frame
 
@@ -40,13 +40,15 @@ class FaceTrack(ImageStream):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = self.face_cascade.detectMultiScale(gray, 1.3, minNeighbors=5)
 
-        myFaceListC = []
-        myFaceListArea = []
+        # while len(faces) == 0:
+        #     self.rotate_in_place()
+        #     faces = self.face_cascade.detectMultiScale(gray, 1.3, minNeighbors=5)
 
         face_center_x = center_x
         face_center_y = center_y
         z_area = 0
         for face in faces:
+            print("Face Found!")
             (x, y, w, h) = face
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 255, 0), 2)
 
@@ -85,19 +87,20 @@ class FaceTrack(ImageStream):
         #     return img, [[0, 0], 0]
         #
 
-    def adjust_telo_position(self, offset_x, offset_y, offset_z):
+    def adjust_tello_position(self, offset_x, offset_y, offset_z):
         """
             Adjusts the position of the tello drone based on the offset values given from the frame
             :param offset_x: Offset between center and face x coordinates
             :param offset_y: Offset between center and face y coordinates
             :param offset_z: Area of the face detection rectangle on the frame
         """
+        print("adjusting drone position")
 
         if not -90 <= offset_x <= 90 and offset_x is not 0:
             if offset_x < 0:
-                self.me.rotate_ccw(10)
+                self.me.rotate_counter_clockwise(10)
             elif offset_x > 0:
-                self.me.rotate_cw(10)
+                self.me.rotate_clockwise(10)
 
         if not -70 <= offset_y <= 70 and offset_y is not -30:
             if offset_y < 0:
@@ -109,14 +112,18 @@ class FaceTrack(ImageStream):
             if offset_z < 15000:
                 self.me.move_forward(20)
             elif offset_z > 30000:
-                self.me.move_backward(20)
+                self.me.move_back(20)
+
+    def rotate_in_place(self):
+        print("rotating.......")
+        self.me.rotate_counter_clockwise(10)
 
     def track(self):
 
         # cap = cv2.VideoCapture(0)
         self.stream()
         self.me.takeoff()
-        self.me.send_rc_control(0, 0, 15, 0)
+        self.me.send_rc_control(0, 0, 20, 0)
         time.sleep(2.2)
         while True:
             self.find_face()
