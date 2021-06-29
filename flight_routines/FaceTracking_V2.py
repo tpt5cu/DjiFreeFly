@@ -40,9 +40,12 @@ class FaceTrack(ImageStream):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = self.face_cascade.detectMultiScale(gray, 1.3, minNeighbors=5)
 
-        # while len(faces) == 0:
-        #     self.rotate_in_place()
-        #     faces = self.face_cascade.detectMultiScale(gray, 1.3, minNeighbors=5)
+        while len(faces) == 0:
+            print("rotating.......")
+            self.me.send_rc_control(0, 0, 20)
+            faces = self.face_cascade.detectMultiScale(gray, 1.3, minNeighbors=5)
+            if len(faces) > 0:
+                break
 
         face_center_x = center_x
         face_center_y = center_y
@@ -64,28 +67,13 @@ class FaceTrack(ImageStream):
         # add 30 so drone can see more
         offset_y = face_center_y - center_y - 30
 
-        cv2.putText(frame, f'[{offset_x}, {offset_y}, {z_area}]', (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255),
-                   2, cv2.LINE_AA)
+        cv2.putText(frame, f'[{offset_x}, {offset_y}, {z_area}]', (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 2,
+                    (255, 255, 255), 2, cv2.LINE_AA)
 
         self.adjust_tello_position(offset_x, offset_y, z_area)
 
         cv2.imshow('Tello TrackFace_V2', frame)
-        # @deprecated
-        # for (x, y, w, h) in faces:
-        #     cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
-        #     cx = x + w/2
-        #     cy = y + h/2
-        #     area = w * h
-        #
-        #     myFaceListC.append([cx, cy])
-        #     myFaceListArea.append(area)
-        #
-        # if len(myFaceListC) != 0:
-        #     i = myFaceListArea.index(max(myFaceListArea))
-        #     return img, [myFaceListC[i], myFaceListArea[i]]
-        # else:
-        #     return img, [[0, 0], 0]
-        #
+
 
     def adjust_tello_position(self, offset_x, offset_y, offset_z):
         """
@@ -113,10 +101,6 @@ class FaceTrack(ImageStream):
                 self.me.move_forward(20)
             elif offset_z > 30000:
                 self.me.move_back(20)
-
-    def rotate_in_place(self):
-        print("rotating.......")
-        self.me.rotate_counter_clockwise(10)
 
     def track(self):
 
