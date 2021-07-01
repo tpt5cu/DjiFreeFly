@@ -38,25 +38,30 @@ class FaceTrack(ImageStream):
 
         #Convert frame to grayscale in order to apply haar cascade
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = self.face_cascade.detectMultiScale(gray, 1.3, minNeighbors=5)
 
+        # returns faces, this is a tuple
+        faces = self.face_cascade.detectMultiScale(gray, 1.3, minNeighbors=5)
         face_center_x = center_x
         face_center_y = center_y
         z_area = 0
-        for face in faces:
+
+        face_candidates = []
+        for (x,y,w,h) in faces:
             print("Face Found!")
-            (x, y, w, h) = face
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 255, 0), 2)
 
             face_center_x = x + int(h/2)
             face_center_y = y + int(w/2)
             z_area = w*h
 
+            #Append to the list all the candidate faces, we will take the closest one
+            face_candidates.append((z_area, [face_center_x, face_center_y]))
             cv2.circle(frame, (face_center_x, face_center_y), 10, (0, 0, 255))
 
-        print(faces)
-        print(type(faces))
         if len(faces) != 0:
+            # the face with the biggest z area is the closes face and hence the face we wanna focus on
+            max_area_idx = face_candidates.index(max(face_candidates))
+            z_area, face_center_x, face_center_y = face_candidates[max_area_idx]
             # Calculate recognized face offset from center
             offset_x = face_center_x - center_x
             # add 30 so drone can see more
@@ -76,6 +81,9 @@ class FaceTrack(ImageStream):
     def adjust_tello_position(self, offset_x, offset_y, offset_z):
         """
             Adjusts the position of the tello drone based on the offset values given from the frame
+
+            TODO: Use a pid controller for this
+
             :param offset_x: Offset between center and face x coordinates
             :param offset_y: Offset between center and face y coordinates
             :param offset_z: Area of the face detection rectangle on the frame
@@ -110,9 +118,10 @@ class FaceTrack(ImageStream):
         while True:
             self.find_face()
             if cv2.waitKey(1) == ord('q'):
+                self.me.land()
+                self.me.end()
+                cv2.destroyAllWindows()
                 break
 
-        self.me.land()
-        self.me.end()
-        cv2.destroyAllWindows()
+
 
