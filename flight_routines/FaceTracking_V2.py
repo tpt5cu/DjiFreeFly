@@ -40,13 +40,6 @@ class FaceTrack(ImageStream):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = self.face_cascade.detectMultiScale(gray, 1.3, minNeighbors=5)
 
-        while len(faces) == 0:
-            print("rotating.......")
-            self.me.send_rc_control(0, 0, 20)
-            faces = self.face_cascade.detectMultiScale(gray, 1.3, minNeighbors=5)
-            if len(faces) > 0:
-                break
-
         face_center_x = center_x
         face_center_y = center_y
         z_area = 0
@@ -61,16 +54,21 @@ class FaceTrack(ImageStream):
 
             cv2.circle(frame, (face_center_x, face_center_y), 10, (0, 0, 255))
 
+        print(faces)
+        print(type(faces))
+        if len(faces) != 0:
+            # Calculate recognized face offset from center
+            offset_x = face_center_x - center_x
+            # add 30 so drone can see more
+            offset_y = face_center_y - center_y - 30
 
-        # Calculate recognized face offset from center
-        offset_x = face_center_x - center_x
-        # add 30 so drone can see more
-        offset_y = face_center_y - center_y - 30
+            cv2.putText(frame, f'[{offset_x}, {offset_y}, {z_area}]', (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 2,
+                        (255, 255, 255), 2, cv2.LINE_AA)
 
-        cv2.putText(frame, f'[{offset_x}, {offset_y}, {z_area}]', (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 2,
-                    (255, 255, 255), 2, cv2.LINE_AA)
-
-        self.adjust_tello_position(offset_x, offset_y, z_area)
+            self.adjust_tello_position(offset_x, offset_y, z_area)
+        else:
+            print("no face found......rotating....")
+            self.me.send_rc_control(0, 0, 0, 20)
 
         cv2.imshow('Tello TrackFace_V2', frame)
 

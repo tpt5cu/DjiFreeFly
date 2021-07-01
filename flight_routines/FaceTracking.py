@@ -35,6 +35,8 @@ class FaceTrack(ImageStream):
 			i = myFaceListArea.index(max(myFaceListArea))
 			return img, [myFaceListC[i], myFaceListArea[i]]
 		else:
+			print("no face found......rotating....")
+			self.me.send_rc_control(0, 0, 0, 20)
 			return img, [[0, 0], 0]
 
 
